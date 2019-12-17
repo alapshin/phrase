@@ -11,6 +11,7 @@ buildscript {
 }
 dependencies {
   repositories {
+    google()
     jcenter()
   }
 }
@@ -36,7 +37,7 @@ android {
 }
 
 dependencies {
-  implementation 'com.android.support:support-annotations:23.1.1'
+  implementation 'androidx.annotation:annotation:1.1.0'
 
   testImplementation 'junit:junit:4.12'
   testImplementation 'org.mockito:mockito-core:1.10.19'
