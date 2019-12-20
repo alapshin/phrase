@@ -162,6 +162,11 @@ public class PhraseTest {
     }
   }
 
+  @Test public void tokensCanHaveDigits() {
+    assertThat(from("hi {name1} and {name2}").put("name1", "Abe")
+            .put("name2", "Eric").format().toString()).isEqualTo("hi Abe and Eric");
+  }
+
   @Test public void tokensCanHaveUnderscores() {
     assertThat(from("{first_name}").put("first_name", "Eric").format().toString()).isEqualTo(
         "Eric");
