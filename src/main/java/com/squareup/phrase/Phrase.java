@@ -273,7 +273,7 @@ public final class Phrase {
 
     // Consume the opening '{'.
     consume();
-    while ((curChar >= 'a' && curChar <= 'z') || curChar == '_') {
+    while ((curChar >= 'a' && curChar <= 'z') || (curChar >= '0' && curChar <= '9') || curChar == '_') {
       sb.append(curChar);
       consume();
     }
