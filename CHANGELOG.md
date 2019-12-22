@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+## Version 1.2.0
+
+_2019-12-22_
+
+ * Update dependencies
+ * Migrate to AndroidX
+ * Add support for using digits in keys
+
 ## Version 1.1.0
 
 _2015-04-17_
