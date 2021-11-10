@@ -20,7 +20,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import androidx.annotation.PluralsRes;
 import androidx.annotation.StringRes;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.TextView;
 import java.util.HashMap;
@@ -56,6 +58,7 @@ public final class Phrase {
   /** All keys parsed from the original pattern, sans braces. */
   private final Set<String> keys = new HashSet<String>();
   private final Map<String, CharSequence> keysToValues = new HashMap<String, CharSequence>();
+  private final Map<String, Integer> keysToColors = new HashMap<String, Integer>();
 
   /** Cached result after replacing all keys with corresponding values. */
   private CharSequence formatted;
@@ -191,6 +194,19 @@ public final class Phrase {
   }
 
   /**
+   * Replaces text color by key.
+   * @param color - new text color
+   */
+  public Phrase color(String key, int color) {
+    if (color == 0) {
+      throw new IllegalArgumentException("Incorrect color for '" + key + "'");
+    }
+    keysToColors.put(key, color);
+
+    return this;
+  }
+
+  /**
    * Returns the text after replacing all keys with values.
    *
    * @throws IllegalArgumentException if any keys are not replaced.
@@ -206,7 +222,7 @@ public final class Phrase {
       // Copy the original pattern to preserve all spans, such as bold, italic, etc.
       SpannableStringBuilder sb = new SpannableStringBuilder(pattern);
       for (Token t = head; t != null; t = t.next) {
-        t.expand(sb, keysToValues);
+        t.expand(sb, keysToValues, keysToColors);
       }
 
       formatted = sb;
@@ -336,7 +352,7 @@ public final class Phrase {
     }
 
     /** Replace text in {@code target} with this token's associated value. */
-    abstract void expand(SpannableStringBuilder target, Map<String, CharSequence> data);
+    abstract void expand(SpannableStringBuilder target, Map<String, CharSequence> data, Map<String, Integer> colors);
 
     /** Returns the number of characters after expansion. */
     abstract int getFormattedLength();
@@ -362,7 +378,7 @@ public final class Phrase {
       this.textLength = textLength;
     }
 
-    @Override void expand(SpannableStringBuilder target, Map<String, CharSequence> data) {
+    @Override void expand(SpannableStringBuilder target, Map<String, CharSequence> data, Map<String, Integer> keysToColors) {
       // Don't alter spans in the target.
     }
 
@@ -377,7 +393,7 @@ public final class Phrase {
       super(prev);
     }
 
-    @Override void expand(SpannableStringBuilder target, Map<String, CharSequence> data) {
+    @Override void expand(SpannableStringBuilder target, Map<String, CharSequence> data, Map<String, Integer> keysToColors) {
       int start = getFormattedStart();
       target.replace(start, start + 2, "{");
     }
@@ -399,13 +415,23 @@ public final class Phrase {
       this.key = key;
     }
 
-    @Override void expand(SpannableStringBuilder target, Map<String, CharSequence> data) {
+    @Override void expand(SpannableStringBuilder target, Map<String, CharSequence> data, Map<String, Integer> colors) {
       value = data.get(key);
 
       int replaceFrom = getFormattedStart();
       // Add 2 to account for the opening and closing brackets.
       int replaceTo = replaceFrom + key.length() + 2;
       target.replace(replaceFrom, replaceTo, value);
+
+      // It is necessary to replace value color if such a key exists
+      if (colors.containsKey(key)) {
+        target.setSpan(
+                new ForegroundColorSpan(colors.get(key)),
+                replaceFrom,
+                replaceFrom + value.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+      }
     }
 
     @Override int getFormattedLength() {

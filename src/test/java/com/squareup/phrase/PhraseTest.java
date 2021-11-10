@@ -16,8 +16,10 @@
 package com.squareup.phrase;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.widget.TextView;
 
 import org.junit.Rule;
@@ -205,5 +207,14 @@ public class PhraseTest {
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("TextView must not be null.");
     Phrase.from("Hello {user}!").put("user", "Eric").into(null);
+  }
+
+  @Test public void tokensCanHaveHighlighting() {
+    CharSequence text = from("hi {name} {name}")
+            .put("name", "Abe")
+            .color("name", Color.RED)
+            .format();
+    Object[] allSpans = ((Spanned) text).getSpans(0, text.length(), Object.class);
+    assertThat(allSpans.length == 2).isTrue();
   }
 }
