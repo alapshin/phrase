@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 1.2.2
+
+_2021-11-10_
+
+ * Added ability to change the color of inserted value by key
+
 ## Version 1.2.0
 
 _2019-12-22_
